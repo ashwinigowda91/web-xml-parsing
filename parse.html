@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>
+		XML Parsing
+	</title>
+	
+</head>
+<body>
+<div align = "center">
+<br/>
+<br/>
+<p>Enter URL for Company List XML File</p>
+<form id = "form" action = "">
+<input type = "text" id = "xmlbox"><br/><br/>
+<button onclick = "validateInput()">Submit</button>
+<!-- </body> -->
+</div>
+    
+    <script type = "text/javascript">
+	
+	function validateInput()
+	{
+		var val = document.getElementById("xmlbox").value;
+		if(val == null || val.trim() == "")
+		{
+			alert('Please provide a valid URL for XML file');	
+		}
+		else
+		{
+			loadXML(val);
+		}
+	}
+	
+    function validateDoc(xml)
+    {
+        if(xml == null)
+            {
+                alert('XML file does not exist');
+            }
+        else if(xml.documentElement.nodeName == "parsererror" || xml.documentElement.nodeName == "error while parsing")
+            {
+                alert('Error in XML file');
+            }
+        else
+            {
+                createNewWindow(xml);
+            }  
+    }
+        
+    function createNewWindow(xml)
+    {
+        var target, header, i, row;
+        row = xml.getElementsByTagName("Row");
+        if(row.length <= 0)
+            {
+                alert('No radio stations found in XML file');
+            }
+        else
+            {
+                //table header print
+                target = window.open('', '_blank','scrollbars=1,width=1000,height=800');
+                target.document.write("<!DOCTYPE html><html><head><style>table{table-layout:fixed;}</style><title>Assignment 4</title></head><body>");
+                header = xml.getElementsByTagName("Data");
+                target.document.write("<table border ='1' align='left'>");
+                target.document.write("<tr>");
+                for(i=0; i<header.length; i++)
+                    {
+                        if(header[i].childNodes.length < 1)
+                            {
+                                target.document.write("<th height='50px'> </th>");
+                            }
+                        else
+                            {
+                                target.document.write("<th height='50px'>"+header[i].childNodes[0].nodeValue+"</th>");
+                            }   
+                    }
+                target.document.write("</tr>");
+                
+                var ch, x, s1, s2, s3, s4, s5;
+                
+                for(x=0; x<row.length; x++)
+                    {
+                        target.document.write("<tr>");
+                        ch = getFirstChild(row[x]);
+                        if(ch.childNodes.length <= 0)
+                            {
+                                target.document.write("<td width='50px'> </td>");
+                            }
+                        else
+                            {
+                                target.document.write("<td width='50px'>"+ch.childNodes[0].nodeValue+"</td>");
+                            }
+                
+                        s1 = getNextSibling(ch);
+                        if(s1.childNodes.length < 1)
+                            {
+                                target.document.write("<td> </td>");
+                            }
+                        else
+                            {
+                                target.document.write("<td>"+s1.childNodes[0].nodeValue+"</td>");
+                            } 
+                        
+                        s2 = getNextSibling(s1);
+                        if(s2 != null)
+                            {
+                                 var city = getFirstChild(s2);
+                                 if(city != null && city.childNodes.length > 0)
+                                 {
+                                    var school = getNextSibling(city);
+                                    if(school != null && school.childNodes.length > 0)
+                                        {
+                                        target.document.write("<td width='275px'><ul>");
+                                        target.document.write("<li>"+city.childNodes[0].nodeValue+"</li>");
+                                        target.document.write("<li>"+school.childNodes[0].nodeValue+"</li>");
+                                        target.document.write("</ul></td>");
+                                        }
+                                    else
+                                        {
+                                        target.document.write("<td width='275px'><ul>");
+                                        target.document.write("<li>"+city.childNodes[0].nodeValue+"</li>");
+                                        target.document.write("</ul></td>");
+                                        }
+                                  }
+                                  else
+                                  {
+                                        target.document.write("<td width='275px'> </td>");  
+                                  }
+                            }
+                       else
+                           {
+                               target.document.write("<td width='275px'> </td>");  
+                           }
+                        
+                        s3 = getNextSibling(s2);
+                        if(s3.childNodes.length < 1)
+                            {
+                                target.document.write("<td width='75px'> </td>");
+                            }
+                        else
+                            {
+                                target.document.write("<td width='75px'>"+s3.childNodes[0].nodeValue+"</td>");
+                            } 
+                        
+                        s4 = getNextSibling(s3);
+                        if(s4.childNodes.length < 1)
+                            {
+                                target.document.write("<td> </td>");
+                            }
+                        else
+                            {
+                                var link = s4.childNodes[0].nodeValue;
+                                target.document.write("<td><a href='"+s4.childNodes[0].nodeValue+"'target='_blank'>"+s4.childNodes[0].nodeValue+"</a></td>");
+                            }
+                        
+                        s5 = getNextSibling(s4);
+                        if(s5.childNodes.length < 1)
+                            {
+                                target.document.write("<td> </td>");
+                            }
+                        else
+                            {
+                                var i = s5.childNodes[0].nodeValue;
+                                target.document.write("<td><img style='display:block;' width='300px' height='200px' src='"+i+"'</img></td>");
+                            } 
+                        target.document.write("</tr>");
+                    }   
+                target.document.write("</table>");
+            }
+    }
+        
+    function getFirstChild(n)
+    {
+        var y = n.firstChild;
+        while (y.nodeType != 1) 
+            {
+                y = y.nextSibling;
+                if(y == null)
+                    {
+                        return y;
+                    }
+            }
+        return y;
+    }
+        
+    function getNextSibling(n)
+    {
+        var y = n.nextSibling;
+        while(y.nodeType != 1)
+            {
+                y = y.nextSibling;
+                if(y == null)
+                    {
+                        return y;
+                    }
+            }
+        return y;
+    }
+        
+	function loadXML(url)
+	{
+        var xmlhttp;
+        var xml;
+        
+        if (window.XMLHttpRequest) 
+			{
+            		xmlhttp = new XMLHttpRequest();
+            }
+        else 
+			{
+            		xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+        xmlhttp.open("GET",url,false); 
+        xmlhttp.setRequestHeader('Content-Type','text/xml');
+        xmlhttp.send(); 
+        xml = xmlhttp.responseXML;
+        validateDoc(xml);
+	}
+	</script>
+<noscript>
+</body>
+</html>
